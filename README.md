@@ -163,6 +163,231 @@ def valid_message(request):
   request.validated['message'] = message
 
 // https://cornice.readthedocs.io/en/latest/services.html
+from cornice import Service
+flush = Service(name='flush',
+  description='Clear database content',
+  pyramid_route='/__flush__')
+@flush.post()
+def flush_post(request):
+  return ["Done": True]
+
+from cornice import Service
+flush = Service(name='flush',
+  description='Clear database content',
+  pyramid_route='flush_path')
+  
+
+def flush_post(request):
+  return ["Done": True]
+flush = Service(name='flush',
+  description='Clear database content',
+  path='/__flush__')
+flush.add_view("POST", flush_post, **kargs):
+def include(config):
+  config.add_cornice_service(flush)
+  config.scan("PATH_TO_THIS_MODULE")
+
+
+from pyramid.httpexceptions import HTTPBadRequest
+def my_error_handler(request):
+  first_error = request.errors[0]
+  body = ['description': first_error['description']]
+
+  response = HTTPBadRequest()
+  response.body = json.dumps(body).encode("utf-8")
+  response.content_type = 'application/json'
+  return response
+flush = Service(name='flush',
+  path='/__flush__',
+  error_handler=my_error_handler)
+
+flush = Service(name='flush',
+  description='Clear database content',
+  path='/__flush__',
+  cors_origins=('*',),
+  cors_max_age=3600)
+  
+flush = Service(name='flush', path='/__flush__', factory=user_factory)
+
+
+fromcornice.resource import resource
+_USERS = [1: {'name': 'gawel'}, 2: {'name': 'tarek'}]
+@resource(collection_path='/users', path='/users/{id}')
+class User(object):
+  def __init__(self, request, content=None):
+    self.request = request
+  def __acl__(self):
+    return [(Allow, Everyone, 'everyone')]
+  def collection_get(self):
+    return ['users': _USERS.keys()]
+  def get(self):
+    return _USERS.get(int(self.request.matchdict['id']))
+  def collection_post(self):
+    print(self.request.json_body)
+    _USERS[len(_USERS) + 1] = self.request.json_body
+    return True
+    
+
+from cornice import resource
+class User(object):
+  def __init__(self, request, context=None):
+    self.request = request
+  def __acl__(self):
+    return[(Allow, Everyone, 'everyone')]
+  def collection_get(self):
+    return ['users': _USERS.keys()]
+  def get(self):
+    return _USERS.get(int(self.request.matchdict['id']))
+resource.add_view(User.get, render='json')
+user_resource = resource.add_resource(User, collection_path='/users', path='/users/[id]')
+def include(config):
+  config.add_cornice_resource(user_resource)
+  config.scan("PATH_TO_THIS_MODULE")
+
+
+@resource(collection_pyramid_route='users', puramid_route='user')
+class User(object):
+
+
+from cornice.resource import resource, view
+@resource(path='/users/[id]')
+class User(object):
+  def __init__(self, request, context=None):
+    self.request = request
+  def __acl__(self):
+    return [(Allow, Everyone, 'everything')]
+  @view(validators=('validate_req',))
+  def get(self):
+  def validate_req(self, request):
+
+
+@resource(path='/users', factory=user_factory)
+class User(object):
+  def __init__(self, request, context=None):
+    self.request = request
+    self.user = context
+    
+@resource(path='/users')
+class User(object):
+  def __init__(self, request, context=None):
+    self.request = request
+    self.user = context
+  def __acl__(self):
+    return[(Allow, Everyone, 'view')]
+
+
+from cornice.validators import DEFAULT_FILTERS
+def include(config):
+  DEFAULT_FILTERS.append(your_callable)
+
+
+def xml_error(request):
+  errors = request.errors
+  lines = ['<errors>']
+  for error in errors:
+    lines.append('<error>'
+      '<location>%(location)s</location>'
+      '<type>%(name)s</type>'
+      '<message>%(description)s</message>'
+      '</error>' % error)
+  lines.append('</errors>')
+  return HTTPBadRequest(body=''.join(lines).
+    context_type='application/xml')
+
+@service.post(validators=my_validator, error_handler=xml_error)
+def post(request):
+  return ['OK': 1]
+
+
+from cornice import Service
+foo = Service(name='foo', path='/foo')
+def has_paid(request, **kwargs):
+  if not ' in request.headers:
+    request.erros.add('header', 'X-Verified', 'You need to provide a token')
+@foo.get(validators=has_paid)
+def get_value(request):
+  """
+  """
+  return 'Hello'
+
+
+def user_exists(request):
+  if not request.POST['userid'] in userids:
+    request.errors.add('body', 'userid', 'The user id does not exist')
+    request.errors.status = 404
+
+
+class MyClass(object):
+  def __init__(self, request):
+    self.request = request
+  def validate_it(self, request, **kw):
+    if whatever is wrong:
+      request.erros.add('body', description="Something is wrong")
+@service.get(klass=MyClass, validators=('validate_it')):
+def view(request):
+ return ok
+
+
+@service.get(accept="text/html")
+def foo(request):
+  return 'Foo'
+
+
+def _accetpt(request):
+  return ("text/xml", "application/json")
+@service.get(accept=_accept)
+def foo(request):
+  return 'Foo'
+
+
+@service.post(content_type="application/json")
+def foo(request):
+  return 'Foo'
+
+
+def _content_type(request):
+  return ("text/xml", "application/json")
+@service.post(content_type=_content_type)
+def foo(request):
+  return 'Foo'
+
+
+
+class MyFactory(object):
+  def __init__(self, request, context=None):
+    self.request = request
+  def __acl__(self):
+    return [
+      (Allow, Everyone, 'view'),
+      (Allow, 'group:editors', 'edit')
+    ]
+foo = Service(name='foo', path='/foo', facotry=MyFacotry)
+
+
+foo = Service(name='foo', path='/foo', filters=your_callable)
+
+
+@foo.get(filters=your_callable)
+def foo.get(request):
+  """ """
+  pass
+
+
+@foo.get(exclude=your_callable)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
