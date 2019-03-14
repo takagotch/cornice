@@ -172,7 +172,7 @@ def valid_message(request):
 
 ```
 
-```
+```sh
 pip install cornice
 pip install cookiecutter
 cookiecutter gh:Cornices/cookiecutter-cornice
