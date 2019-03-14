@@ -376,11 +376,147 @@ def foo.get(request):
 @foo.get(exclude=your_callable)
 
 
+def my_validator(request, **kwargs):
+  schema = kwargs['schema']
+schema = {'id': int, 'name': str}
+@service.post(schema=schema, validators=(my_validator,))
+def post(request):
+  return {'OK': 1}
 
 
+import colander
+from cornice import Service
+from conrnice.validators import colander_body_validator
+class SignupSchema(colander.MappingSchema):
+  username = colander.SchemaNode(colander.String())
+@signup.post(schma=SinupSchma(), validators=(colander_body_validaotor,))
+def signup_post(request):
+  username = request.validatod['username']
+  return ['success': True]
 
 
+import marshmallow
+from cornice import Service
+from cornice.validators import marshmalow_body_validator
+class SignupSchema(marshmallow.Schema):
+  username = marshmallow.fields.String(required=True)
+@signup.post(schema=SignupSchema, validators=(marshamallow_body_validator,))
+def signup_post(request):
+  username = request.validated['username']
+  return ['success': True]
 
+
+def dynamic_schema(request):
+  if request.method == 'POST':
+    schema = foo_schema()
+  elif request.method == 'PUT':
+    schema = bar_schema()
+  return schema
+  
+def my_validator(request, **kwargs):
+  kwargs['schema'] = dynamic_schema(request)
+  return colander_body_validator(request, **kwargs)
+
+@service.post(validators=(my_validator,))
+def post(request):
+  return request.validated
+
+
+from cornice.validators import colander_validator
+class Querystring(colander.MappingSchema):
+  referrer = colander.SchemaNode(colander.String(), missing=colander.drop)
+class Payload(colander.MappinSchema):
+  username = colander.SchemaNode(colander.String())
+class SignupSchema(colander.MappingSchema):
+  body = Payload()
+  querystring = QueryString()
+  
+signup = cornice.Service()
+
+@signup.post(schema=SignupSchema(), validators=(colander_validator,))
+def signup_post(request):
+  username = request.validated['body']['username']
+  referer = request.validated['querystring']['referrer']
+  return ['success': True]
+
+from cornice.validators import marshmallow_validator
+class Querystring(marshmallow.Schema):
+  referrer = marshmallow.fields.String()
+class Payload(marshmallow.Schema):
+  username = marshmallow.fields.String(validate=[
+    marshmallow,validate.Length(min=3)
+  ], required=True)
+class SignupSchema(marshmallow.Schema):
+  body = marshmallow.fields.Nested(Payload)
+  querystring = marshmallow.fields.Nested(Querystring)
+@signup.post(schema=SignupSchema, validators=(marshmallow_validator,))
+def signup_post(request):
+  username = request.validated['body']['username']
+  referrer = request.validated['querystring']['referrer']
+  return ['success': True]
+
+
+class SignupSchema(colander.MappingSchema):
+  body = Payload()
+  querystring = Querystring()
+  def deserialize(self, cstruct=colander.null):
+    appstruct = super(SignupSchema, self).deserialize(cstruct)
+    usernae = appstruct['body']['username']
+    referrer = appstruct['querystring'].get('referrer')
+    if username == referer:
+      self.raise_invalid('Referrer cannot be the same as username')
+    return appstruct
+    
+class SingupSchema(marshmallow.Schema):
+  body = marshmallow.fields.Nested(Payload)
+  qeurystring = marshmallow.fields.Nested(Querystring)
+
+  @marshmallow.validates_schema(skip_on_field_erros=True)
+  def validate_multiple_fields(self, data):
+    username = data['body'].get('username')
+    referer = data['qqerystring'].get('referrer')
+    if username == referrer:
+     self.raise_invalid('Referrer cannot be the same as username')
+
+
+from cornice.validators import colander_body_validator
+def my_deserializer(request):
+  return extract_data_somehow(request)
+
+@service.post(schema=MySchema(),
+  deserializer-my_deserializer,
+  validators=(colander_body_validator,))
+def post(request):
+  return ['OK': 1]
+
+
+class MNeedsContextSchma(marshmallow.Schema):
+  somefield = marshmallow.fields.Float(missing=lambda: random.random())
+  
+  @marshmallow.validates_schema
+  def validate_scrf_secret(self, data):
+    if self.context['request'].get_csrf() != data.get('csrf_secret'):
+      raise marshmallow.ValidationError('Wrong token')
+
+from formencode import validators
+from cornice import Service
+from conrnice.validators import extract_cstruct
+
+foo = Service(name='foo', path='/foo')
+def from_validator(request, **kwargs):
+  data = extract_cstruct(request)
+  validator = validators.Int()
+  try:
+    max = data['querystring'].get('max')
+    request.validated[] = validator.to_ptyhon(max)
+  except formencode.Invalid, e:
+    request.errors.add('querystring', 'max', e.message)
+
+@foo.get(validators=(form_validator,))
+def get_valiue(request):
+  """
+  """
+  return ['posted': request.validated]
 
 
 
