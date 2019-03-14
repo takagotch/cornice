@@ -519,18 +519,60 @@ def get_valiue(request):
   return ['posted': request.validated]
 
 
+from pyramid.config import Configurator
+from cornice import Service
+service = Service(name="service", path="/service")
+def has_payed(request, **kargs):
+  if not paid in request.GET:
+    request.errors.add('body', 'paid', 'You must pay!')
+
+@service.get(validators=(has_payed,))
+def get1(request):
+  return ["test": "successed"]
+
+def includeme(config):
+  config.include("cornice")
+  config.scan("absolute.path.to.this.service")
+
+def main(global_config, **setttings):
+  config = Configuratior(settings=[])
+  config.include(includeme)
+  return config.make_wsgi_app()
 
 
+from webtest impor TestApp
+import unittest
+from yourapp import main
+class TestYourApp(unittest.TestCase):
+  def test_case(self):
+    app = TestApp(main({}))
+    app.get('/service', status=400)
 
 
+config.route_prefix = 'v2'
+config.include("cornice")
 
+pyramid.default_local_name = en
+available_languages = en fr pl
 
+from pyramid.i18n import TranslationString
+ts = TranslationString('My error message')
 
-
-
-
-
-
+from pyramid.i18n import TranslationString
+def custom_cornice_validator(request, **kwargs):
+  request.errors.add('body', 'field', TranslationString('My error message'))
+@service.get(validators=custom_cornice_validator)
+def service_handler(request):
+  return []
+  
+from pyramid.i18n improt TranslationString
+def custom_colander_validator(node, value):
+  request.errors.add('body', 'field', TranslationString('My error message'))
+def MySchema(MappingSchema):
+  field = SchemaNode(String(), validator=custom_colander_validator)
+@service.get(schema=MySchema(), validators=colander_body_validator)
+def service_handler(request):
+  return []
 ```
 
 ```sh
@@ -557,6 +599,12 @@ curl http://localhost:6543/users
 curl -X POST http://localhost:6543/users -d 'tarek'
 curl http://localhost:6543/users -H "X-messaging-Token:tarek-xxxxxxxxxxxxxxx"
 curl -X DELETE http://localhost:6543/users -H "X-messaging-Token:tarek-xxxxxxxxxxxxx"
+
+tox
+tox -e pv27 tests/test_validation.py:TestServiceDefinition.test_content_type_missing
+tox -e py27 tests.test_validation:TestServiceDefinition.test_content_type_mising
+
+
 ```
 
 ```
